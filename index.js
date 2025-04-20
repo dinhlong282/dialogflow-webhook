@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const OpenAI = require("openai");
+const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
@@ -14,11 +14,6 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
-
-// Cấu hình OpenAI SDK mới
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Schema sản phẩm
 const Product = mongoose.model("Product", {
@@ -70,35 +65,34 @@ app.post("/webhook", async (req, res) => {
     }
   }
 
-  // Intent: Hỏi tự do (dùng ChatGPT)
+  // Intent: GPT bằng Gemini API
   if (intentName === "ask_product_gpt") {
     try {
-      console.log("👉 Gửi yêu cầu đến OpenAI với nội dung:", userMessage);
+      console.log("👉 Gửi yêu cầu đến Gemini với nội dung:", userMessage);
 
-      const gptRes = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content:
-              "Bạn là nhân viên tư vấn thân thiện của shop thời trang online. Trả lời ngắn gọn, dễ hiểu, giúp người dùng chọn sản phẩm phù hợp.",
-          },
-          {
-            role: "user",
-            content: userMessage,
-          },
-        ],
-      });
+      const geminiRes = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        {
+          contents: [
+            {
+              parts: [{ text: userMessage }],
+            },
+          ],
+        }
+      );
 
-      const answer = gptRes.choices[0].message.content;
-      console.log("✅ Phản hồi từ GPT:", answer);
+      const reply =
+        geminiRes.data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "Xin lỗi, tôi chưa hiểu rõ yêu cầu.";
+
+      console.log("✅ Phản hồi từ Gemini:", reply);
 
       return res.json({
-        fulfillmentText: answer,
+        fulfillmentText: reply,
       });
     } catch (err) {
       console.error(
-        "❌ Lỗi khi gọi OpenAI:",
+        "❌ Lỗi khi gọi Gemini API:",
         err?.response?.data || err.message || err
       );
       return res.json({
@@ -115,7 +109,7 @@ app.post("/webhook", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("✅ Dialogflow Webhook is running!");
+  res.send("✅ Dialogflow Webhook (Gemini) is running!");
 });
 
 app.listen(PORT, () => {
