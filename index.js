@@ -36,6 +36,7 @@ app.post("/webhook", async (req, res) => {
   console.log("📩 Intent received from Dialogflow:", intentName);
 
   // Intent: Sản phẩm nam
+  // Intent: Sản phẩm nam
   if (intentName === "ask_male_product") {
     try {
       const menProducts = await Product.find({ category: "men" });
@@ -48,14 +49,14 @@ app.post("/webhook", async (req, res) => {
 
       const responseText = menProducts
         .map((p, i) => {
-          return `${i + 1}. ${p.name} - ${
-            p.new_price
-          }K<br>https://your-domain.com/product/${p.id}`;
+          return `${i + 1}. <a href="https://localhost:3000/product/${
+            p.id
+          }" target="_blank">${p.name} - ${p.new_price}K</a>`;
         })
-        .join("<br><br>");
+        .join("<br>");
 
       return res.json({
-        fulfillmentText: `Dưới đây là một số sản phẩm dành cho nam:<br><br>${responseText}`,
+        fulfillmentText: `Dưới đây là một số sản phẩm dành cho nam:<br>${responseText}`,
       });
     } catch (error) {
       console.error("❌ MongoDB error:", error);
