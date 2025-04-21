@@ -51,11 +51,8 @@ app.post("/webhook", async (req, res) => {
       }
 
       const responseText = menProducts
-        .map(
-          (p, i) =>
-            `${i + 1}. ${p.name} - ${p.new_price}K\n${DOMAIN}/product/${p.id}`
-        )
-        .join("\n\n");
+        .map((p, i) => `${i + 1}. ${p.name} - ${p.new_price}K`)
+        .join(" | "); // hoặc dùng dấu phẩy ", " nếu bạn thích
 
       return res.json({
         fulfillmentText: `Dưới đây là một số sản phẩm dành cho nam:\n\n${responseText}`,
@@ -80,11 +77,8 @@ app.post("/webhook", async (req, res) => {
       }
 
       const responseText = femaleProducts
-        .map(
-          (p, i) =>
-            `${i + 1}. ${p.name} - ${p.new_price}K\n${DOMAIN}/product/${p.id}`
-        )
-        .join("\n\n");
+        .map((p, i) => `${i + 1}. ${p.name} - ${p.new_price}K`)
+        .join(" | ");
 
       return res.json({
         fulfillmentText: `Dưới đây là một số sản phẩm dành cho nữ:\n\n${responseText}`,
@@ -109,11 +103,8 @@ app.post("/webhook", async (req, res) => {
       }
 
       const responseText = kidProducts
-        .map(
-          (p, i) =>
-            `${i + 1}. ${p.name} - ${p.new_price}K\n${DOMAIN}/product/${p.id}`
-        )
-        .join("\n\n");
+        .map((p, i) => `${i + 1}. ${p.name} - ${p.new_price}K`)
+        .join(" | ");
 
       return res.json({
         fulfillmentText: `Một số sản phẩm dễ thương dành cho trẻ em:\n\n${responseText}`,
