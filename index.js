@@ -37,6 +37,9 @@ app.post("/webhook", async (req, res) => {
 
   // Intent: Sản phẩm nam
   // Intent: Sản phẩm nam
+  const DOMAIN = "https://localhost:3000"; // hoặc đổi thành domain thật nếu có
+
+  // Intent: Sản phẩm nam
   if (intentName === "ask_male_product") {
     try {
       const menProducts = await Product.find({ category: "men" });
@@ -48,15 +51,72 @@ app.post("/webhook", async (req, res) => {
       }
 
       const responseText = menProducts
-        .map((p, i) => {
-          return `${i + 1}. <a href="https://localhost:3000/product/${
-            p.id
-          }" target="_blank">${p.name} - ${p.new_price}K</a>`;
-        })
-        .join("<br>");
+        .map(
+          (p, i) =>
+            `${i + 1}. ${p.name} - ${p.new_price}K\n${DOMAIN}/product/${p.id}`
+        )
+        .join("\n\n");
 
       return res.json({
-        fulfillmentText: `Dưới đây là một số sản phẩm dành cho nam:<br>${responseText}`,
+        fulfillmentText: `Dưới đây là một số sản phẩm dành cho nam:\n\n${responseText}`,
+      });
+    } catch (error) {
+      console.error("❌ MongoDB error:", error);
+      return res.json({
+        fulfillmentText: "Đã xảy ra lỗi khi lấy sản phẩm từ hệ thống.",
+      });
+    }
+  }
+
+  // Intent: Sản phẩm nữ
+  if (intentName === "ask_female_product") {
+    try {
+      const femaleProducts = await Product.find({ category: "women" });
+
+      if (femaleProducts.length === 0) {
+        return res.json({
+          fulfillmentText: "Hiện tại shop chưa có sản phẩm dành cho nữ.",
+        });
+      }
+
+      const responseText = femaleProducts
+        .map(
+          (p, i) =>
+            `${i + 1}. ${p.name} - ${p.new_price}K\n${DOMAIN}/product/${p.id}`
+        )
+        .join("\n\n");
+
+      return res.json({
+        fulfillmentText: `Dưới đây là một số sản phẩm dành cho nữ:\n\n${responseText}`,
+      });
+    } catch (error) {
+      console.error("❌ MongoDB error:", error);
+      return res.json({
+        fulfillmentText: "Đã xảy ra lỗi khi lấy sản phẩm từ hệ thống.",
+      });
+    }
+  }
+
+  // Intent: Sản phẩm trẻ em
+  if (intentName === "ask_kid_product") {
+    try {
+      const kidProducts = await Product.find({ category: "kid" });
+
+      if (kidProducts.length === 0) {
+        return res.json({
+          fulfillmentText: "Hiện tại shop chưa có sản phẩm dành cho trẻ em.",
+        });
+      }
+
+      const responseText = kidProducts
+        .map(
+          (p, i) =>
+            `${i + 1}. ${p.name} - ${p.new_price}K\n${DOMAIN}/product/${p.id}`
+        )
+        .join("\n\n");
+
+      return res.json({
+        fulfillmentText: `Một số sản phẩm dễ thương dành cho trẻ em:\n\n${responseText}`,
       });
     } catch (error) {
       console.error("❌ MongoDB error:", error);
